@@ -15,34 +15,195 @@ FoamFile
 
 // Note: this file is a Copy of $FOAM_TUTORIALS/resources/blockMesh/pitzDaily
 
-convertToMeters 0.001;
+chord		1.0;    // NACA0012 chord length
+farfieldRatio   20.0;   // farfield radius / chord
+zSpan		0.01;   // spanwise depth
+xMid		0.3;    // chordwise station
+tOverC		0.12;   // height/chord ratio
+
+nSplinePts	60;     // points used to define each quater-airfoil
+nTangential	50;     // cells along airfoil/farfield per block
+nRadial		70;     // cells from airfoil to farfield per block
+radialExpansion 400;    // last-cell/first-cell size ratio
+
+convertToMeters 1;
+
+
 
 vertices
 (
-    (-20.6 0 -0.5)
-    (-20.6 25.4 -0.5)
-    (0 -25.4 -0.5)
-    (0 0 -0.5)
-    (0 25.4 -0.5)
-    (206 -25.4 -0.5)
-    (206 0 -0.5)
-    (206 25.4 -0.5)
-    (290 -16.6 -0.5)
-    (290 0 -0.5)
-    (290 16.6 -0.5)
+    #codeStream
+    {
+	codeInclude
+	#{
+	    #include "pointField.H"
+	#};
 
-    (-20.6 0 0.5)
-    (-20.6 25.4 0.5)
-    (0 -25.4 0.5)
-    (0 0 0.5)
-    (0 25.4 0.5)
-    (206 -25.4 0.5)
-    (206 0 0.5)
-    (206 25.4 0.5)
-    (290 -16.6 0.5)
-    (290 0 0.5)
-    (290 16.6 0.5)
+	code
+	#{
+	    const dictionary & d = dict;
+  	    const scalar chord = readScalar(d.lookup("chord"));
+	    const scalar tOverC = readScalar(d.lookup("tOverC"));
+	    const scalar ffRatio = readScalar(d.lookup("farfieldRatio"));
+	    const scalar zSpan = readScalar(d.lookup("zSpan"));
+	    const scalar xMid = readScalar(d.lookup("xMid"));	    
+
+	
+	    auto yt = [&](scalar x)
+	    {
+		scalar xc = x/c;
+	 	return 5*tOverC*
+		(
+		   0.2969*Foam::sqrt(xc)
+		   - 0.1260*xc
+		   - 0.3516*Foam::sqr(xc)
+		   + 0.2834*Foam::pow3(xc)
+		   - 1.015*Foam::pow4(xc)
+
+		);
+
+	    };
+
+
+	   point WE = (0, 0, 0);
+	   point NE = (xMid, yt(xMid), 0);
+	   point EE = (chord, 0, 0);
+  	   point NE = (xMid, -yt(xMid), 0);
+
+	   point oWE = (-10*chord, 0, 0);
+           point oNE1 = (xMid, 10*chord, 0);
+           point oNE2 = (21*chord, 10*chord, 0);
+           point oSE1 = (xMid, -10*chord, 0);
+           point oSE2 = (21*chord, -10*chord, 0);
+           point oEE = (21*chord, 0, 0);
+
+	   pointField pts(20);
+	   pointField layer0({WE, NE, EE, NE, oWE, oNE1, oNE2,
+			      oEE, oSE2, oSE1});
+
+	   forAll(layer0, i)
+	   {
+	      pts[i] = layer0[i];
+	      pts[i+10] = layer0[i] + point(0, 0, zSpan);
+	   }
+
+
+	   os << pts;
+
+	#}
+	
+    }
 );
+
+blocks
+{
+   hex (0 4 5 1 10 14 15 11) (50 70 1) simpleGrading (1 400 1)
+   hex (1 5 6 7 11 15 16 17) (50 70 1) simpleGrading (1 400 1)
+   hex ()
+
+
+}
+
+edges
+(
+    #codeStream
+    {
+	codeInclude
+	#{
+	    #include "pointField.H"
+	#};
+
+	code
+	{
+            const dictionary & d = dict;
+            const scalar chord = readScalar(d.lookup("chord"));
+            const scalar tOverC = readScalar(d.lookup("tOverC"));
+            const scalar ffRatio = readScalar(d.lookup("farfieldRatio"));
+            const scalar zSpan = readScalar(d.lookup("zSpan"));
+            const scalar xMid = readScalar(d.lookup("xMid"));
+
+	    const scalar n = readScalar(d.lookup("nSplinePts"))
+	    
+
+
+	    auto yt = [&](scalar x)
+	    {
+		scalar xc = x/c;
+		return 5*tOverC*
+                (
+                   0.2969*Foam::sqrt(xc)
+                   - 0.1260*xc
+                   - 0.3516*Foam::sqr(xc)
+                   + 0.2834*Foam::pow3(xc)
+                   - 1.015*Foam::pow4(xc)
+	    	);
+	    };
+
+	    // cosine-clustered stations between x0 and x1
+	    auto cosineRange = [&](scalar x0, scalar x1, label n)
+	    {
+		scalarField x(n);
+
+		forAll(x, i)
+		{
+		    scalar frac = scalar(i)/scalar(n);
+		    scalar beta = 0.5*(1 - Foam::cos(frac*Foam::constant::mathematical::pi));
+		    x[i] = x0 + beta*(x1-x0);
+
+		}
+
+		return x;
+
+	    }
+
+	    
+	    auto makePts = [&](const scalarField& xs, bool upper, scalar z)
+	    {
+		pointField p(xs.size() - 2);
+		label xsSize = xs.size();
+		for(label i = 1; i < xsSize-1; ++i)
+		{
+		    scalar y = upper ? yt(xs[i]) : -yt(xs[i]);
+		    p[i-1] = point(xs[i], y, z);
+		}
+
+		return p;
+
+	    }
+
+	    scalarField UF = cosineRange(0, xMid, n);
+	    scalarField UA = cosineRange(xMid, chord, n);
+	    scalarField LF = cosineRange(chord, xMid, n);
+	    scalarField LA = cosineRange(xMid, 0, n);
+
+	    
+	    const point upperEllipse(-5*chord, 8.5745*chord, 0);
+	    const point lowerEllipse(-5*chord, -8.5745*chord, 0);
+
+	    os << "(" << nl;
+
+	   os << "soline 0 1 " << makePts(UF, true, 0) << nl;
+           os << "soline 1 2 " << makePts(UA, true, 0) << nl;
+           os << "soline 2 3 " << makePts(LA, false, 0) << nl;
+           os << "soline 3 0 " << makePts(LF, false, 0) << nl;
+
+           os << "soline 10 11 " << makePts(UF, true, zSpan) << nl;
+           os << "soline 11 12 " << makePts(UA, true, zSpan) << nl;
+           os << "soline 12 13 " << makePts(LA, true, zSpan) << nl;
+           os << "soline 13 10 " << makePts(LF, true, zSpan) << nl; 
+	    
+	   os << "arc 4 5 (" << upperEllipse.x() << " " << upperEllipse.y() << " 0 )" << nl;
+           os << "arc 9 4 (" << lowerEllipse.x() << " " << lowerEllipse.y() << " 0 )" << nl;
+
+           os << "arc 14 15 (" << lowerEllipse.x() << " " << lowerEllipse.y() << " " << zSpan << ")" << nl;
+           os << "arc 19 14 (" << lowerEllipse.x() << " " << lowerEllipse.y() << " " << zSpan << ")" << nl;
+	
+
+	}
+
+
+    }
+)
 
 negY
 (
