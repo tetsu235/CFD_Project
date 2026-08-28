@@ -13,32 +13,60 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Parameters: airspeed and angle of attack
+
+speed		15.0;   // freestream speed [m/s]
+alpha		5.0;    //Angle of attack [degrees]
+
+% Calculate the free stream velocity
+
+Uinf #codeStream
+{
+   codeInclude
+   #{
+	#include "mathematicalConstants.H"
+   #};
+
+   code
+   #{
+	const scalar speed = readScalar(d.lookup("speed"));
+ 
+	const scalar alpha = readScalar(d.lookup("alpha"));
+
+	const scalar alpha_rad = alpha*constant::mathematical::pi/180.0;
+
+	const vector U
+	(
+	   speed*cos(alpha_rad),
+	   -speed*sin(alpha_rad),
+	   0
+	);
+
+	os << U;
+
+   #};
+
+}
+
+
+
 dimensions      [0 1 -1 0 0 0 0];
 
 internalField   uniform (0 0 0);
 
 boundaryField
 {
-    inlet
+    farfield
     {
-        type            fixedValue;
-        value           uniform (10 0 0);
+	type		  freestreamVelocity;
+	freestreamValue   uniform $Uinf;
     }
 
-    outlet
+    airfoil
     {
-        type            zeroGradient;
+	type		  noSlip;
     }
 
-    upperWall
-    {
-        type            noSlip;
-    }
-
-    lowerWall
-    {
-        type            noSlip;
-    }
 
     frontAndBack
     {

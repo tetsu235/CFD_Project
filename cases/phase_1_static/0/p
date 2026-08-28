@@ -19,25 +19,15 @@ internalField   uniform 0;
 
 boundaryField
 {
-    inlet
+    farfield
     {
-        type            zeroGradient;
+	type			freestreamPressure;
+	freestreamValue		uniform 0;
     }
 
-    outlet
+    airfoil
     {
-        type            fixedValue;
-        value           uniform 0;
-    }
-
-    upperWall
-    {
-        type            zeroGradient;
-    }
-
-    lowerWall
-    {
-        type            zeroGradient;
+	type			zeroGradient;
     }
 
     frontAndBack
