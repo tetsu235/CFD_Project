@@ -70,14 +70,14 @@ vertices
 	   point EE(chord, 0, 0);
   	   point SE(xMid, -yt(xMid), 0);
 
-	   point oWE(-10*chord, 0, 0);
-           point oNE1(xMid, 10*chord, 0);
-           point oNE2(chord, 10*chord, 0);
-           point oNE3(21*chord, 10*chord, 0);
-	   point oSE1(xMid, -10*chord, 0);
-	   point oSE2(chord, -10*chord, 0);
-           point oSE3(21*chord, -10*chord, 0);
-           point oEE(21*chord, 0, 0);
+	   point oWE(-5*chord, 0, 0);
+           point oNE1(xMid, 5*chord, 0);
+           point oNE2(chord, 5*chord, 0);
+           point oNE3(11*chord, 5*chord, 0);
+	   point oSE1(xMid, -5*chord, 0);
+	   point oSE2(chord, -5*chord, 0);
+           point oSE3(11*chord, -5*chord, 0);
+           point oEE(11*chord, 0, 0);
 
 	   pointField pts(24);
 	   pointField layer0({WE, NE, EE, SE, oWE, oNE1, oNE2, oNE3,
@@ -186,8 +186,8 @@ edges
 	    scalarField LA = cosineRange(chord, xMid, n);
 
 	    
-	    const point upperEllipse(-5*chord, 8.5745*chord, 0);
-	    const point lowerEllipse(-5*chord, -8.5745*chord, 0);
+	    const point upperEllipse(-2*chord, 4.5047*chord, 0);
+	    const point lowerEllipse(-2*chord, -4.5047*chord, 0);
 
 
 	    os << "spline 0 1 " << makePts(UF, true, 0) << nl;
