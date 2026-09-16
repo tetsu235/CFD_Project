@@ -22,9 +22,11 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         2000;
+endTime         1000;
 
 deltaT          1;
+
+adjustTimeStep  no;
 
 writeControl    timeStep;
 
@@ -48,5 +50,37 @@ cacheTemporaryObjects
 (
     kEpsilon:G
 );
+
+functions
+{
+    forceCoeffs
+    {
+	type		forceCoeffs;
+	libs		("libforces.so");
+	
+	writeControl	timeStep;
+	writeInterval	100;
+
+	log		true;
+
+	patches		(airfoil);
+
+	rho		rhoInf;
+	rhoInf		1.225;
+
+	liftDir		(0.087156 0.99619 0);
+	dragDir		(0.99619 -0.087156 0);
+	pitchAxis	(0 0 1);
+
+	CofR		(0.25 0 0);
+
+	magUInf		15;
+
+	lRef		1;
+
+	Aref		0.01;
+
+    }
+}
 
 // ************************************************************************* //

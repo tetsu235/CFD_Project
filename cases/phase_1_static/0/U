@@ -13,12 +13,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+dimensions		[0 1 -1 0 0 0 0];
+
 // Parameters: airspeed and angle of attack
 
 speed		15.0;   // freestream speed [m/s]
 alpha		5.0;    //Angle of attack [degrees]
 
-% Calculate the free stream velocity
+// Calculate the free stream velocity
 
 Uinf #codeStream
 {
@@ -29,9 +31,9 @@ Uinf #codeStream
 
    code
    #{
-	const scalar speed = readScalar(d.lookup("speed"));
+	const scalar speed = readScalar(dict.lookup("speed"));
  
-	const scalar alpha = readScalar(d.lookup("alpha"));
+	const scalar alpha = readScalar(dict.lookup("alpha"));
 
 	const scalar alpha_rad = alpha*constant::mathematical::pi/180.0;
 
@@ -46,13 +48,11 @@ Uinf #codeStream
 
    #};
 
-}
+};
 
 
 
-dimensions      [0 1 -1 0 0 0 0];
-
-internalField   uniform (0 0 0);
+internalField   uniform $Uinf;
 
 boundaryField
 {

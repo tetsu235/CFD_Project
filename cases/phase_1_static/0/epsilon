@@ -16,29 +16,23 @@ FoamFile
 
 dimensions      [0 2 -3 0 0 0 0];
 
-internalField   uniform 14.855;
+internalField   uniform 0.004312;
 
 boundaryField
 {
-    inlet
+    farfield
     {
-        type            fixedValue;
-        value           uniform 14.855;
+	type		turbulentMixingLengthDissipationRateInlet;
+	mixingLength	0.05;
+	value uniform	0.004312;
     }
-    outlet
+
+    airfoil
     {
-        type            zeroGradient;
+	type		epsilonWallFunction;
+	value		uniform 0;
     }
-    upperWall
-    {
-        type            epsilonWallFunction;
-        value           uniform 14.855;
-    }
-    lowerWall
-    {
-        type            epsilonWallFunction;
-        value           uniform 14.855;
-    }
+
     frontAndBack
     {
         type            empty;
