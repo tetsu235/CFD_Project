@@ -14,5 +14,9 @@
 2. The boundary conditions have to be validated
 
 
+# Week2
 
+## Determined the initial and boundary condition
+## Performed mesh quality check using checkMesh, checked residuals for p,U,k and epsilon
+## as a mesh convergence check
 
