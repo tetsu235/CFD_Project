@@ -40,8 +40,8 @@ FoamFile
     rho             rhoInf;
     rhoInf          1.225;
 
-    liftDir         (-0.087156 0.99619 0);
-    dragDir         (0.99619 0.087156 0);
+    liftDir         (0.087156 0.99619 0);
+    dragDir         (0.99619 -0.087156 0);
     pitchAxis       (0 0 1);
 
     CofR            (0.25 0 0);
@@ -52,6 +52,17 @@ FoamFile
 
     Aref            0.01;
 
+}
+
+residuals
+{
+    type   	    residuals;
+    libs	    ("libutilityFunctionObjects.so");
+
+    fields	    (p U k epsilon);
+
+    writeControl    timeStep;
+    writeInterval   100;
 }
 
 // ************************************************************************* //
