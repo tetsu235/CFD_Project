@@ -40,7 +40,7 @@ Uinf #codeStream
 	const vector U
 	(
 	   speed*cos(alpha_rad),
-	   -speed*sin(alpha_rad),
+	   speed*sin(alpha_rad),
 	   0
 	);
 
